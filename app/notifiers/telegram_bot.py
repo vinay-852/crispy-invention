@@ -129,9 +129,13 @@ class TelegramBot:
         except ValueError:
             return None
 
+    async def _on_error(self, update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+        log.exception("bot handler error: %s", context.error)
+
     # -- handler registration ------------------------------------------------
     def _register_handlers(self) -> None:
         app = self.application
+        app.add_error_handler(self._on_error)
 
         wizard = ConversationHandler(
             entry_points=[

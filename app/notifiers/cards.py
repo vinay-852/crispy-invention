@@ -50,12 +50,16 @@ class CardBuilder:
     def detail(detail, rsi: float | None, sentiment: float, headlines: list[str]) -> tuple[str, InlineKeyboardMarkup]:
         arrow = "▲" if (detail.change_pct or 0) >= 0 else "▼"
         senti_label = ("positive" if sentiment > 0 else "neutral" if sentiment == 0 else "negative")
+        price = f"**${detail.price:,.2f}**" if detail.price is not None else "**n/a**"
+        change = f" ({arrow}{abs(detail.change_pct):.1f}%)" if detail.change_pct is not None else ""
+        range_52w = (f"${detail.low_52w:,.2f}–${detail.high_52w:,.2f}"
+                     if detail.low_52w is not None and detail.high_52w is not None else "n/a")
+        cap = f"${detail.market_cap / 1e9:,.1f}B" if detail.market_cap else "—"
         text = (
             f"📈 **{detail.symbol} — {detail.name}**\n"
             f"{detail.exchange} · {detail.sector or '—'}\n\n"
-            f"Price **${detail.price:,.2f}** ({arrow}{abs(detail.change_pct or 0):.1f}%) · "
-            f"52w ${detail.low_52w:,.2f}–${detail.high_52w:,.2f}\n"
-            f"P/E {detail.pe or '—'} · Market cap ${(detail.market_cap or 0) / 1e9:,.1f}B · "
+            f"Price {price}{change} · 52w {range_52w}\n"
+            f"P/E {detail.pe or '—'} · Market cap {cap} · "
             f"RSI(14) {rsi if rsi is not None else '—'}\n"
             f"News sentiment: **{senti_label}** ({len(headlines)} articles)\n\n"
             "What should I do?"
@@ -73,9 +77,12 @@ class CardBuilder:
     @staticmethod
     def confirm_rule(draft: RuleDraft, budget: float) -> tuple[str, InlineKeyboardMarkup]:
         cond = {
-            "price_below": f"price below **${draft.threshold:,.2f}**",
-            "drop_pct": f"dropped more than **{draft.threshold:,.0f}%** from 52w high",
-            "rsi_below": f"RSI(14) below **{draft.threshold:,.1f}**",
+            "price_below": (f"price below **${draft.threshold:,.2f}**"
+                            if draft.threshold is not None else "price below a target"),
+            "drop_pct": (f"dropped more than **{draft.threshold:,.0f}%** from 52w high"
+                         if draft.threshold is not None else "dropped more than X%"),
+            "rsi_below": (f"RSI(14) below **{draft.threshold:,.1f}**"
+                          if draft.threshold is not None else "RSI(14) below a level"),
             "sentiment_positive": "news sentiment **positive**",
             "notify": "just **notify** me",
         }[draft.condition_type.value]
