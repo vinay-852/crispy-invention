@@ -1,0 +1,37 @@
+# Render blueprint — deploy: render.com → New + → Blueprint, or via dashboard
+# after pushing this repo to GitHub. Secrets (sync: false) are entered in the
+# Render dashboard under Environment.
+services:
+  - type: web
+    name: stockwatch-ai
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ALLOWED_CHAT_IDS
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      - key: PAYPAL_MERCHANT_EMAIL
+        sync: false
+      - key: PAYPAL_RECIPIENT_EMAIL
+        sync: false
+      - key: ALPACA_API_KEY
+        sync: false
+      - key: ALPACA_SECRET_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: ADK_MODEL
+        value: gemini-2.0-flash
+      - key: SIMULATE_ORDER
+        value: "true"
+      - key: POLL_INTERVAL_MINUTES
+        value: "5"
