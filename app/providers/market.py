@@ -63,8 +63,9 @@ class MarketData:
         ticker = yf.Ticker(symbol)
         info = ticker.info or {}
         fi = ticker.fast_info
-        price = fi.get("last_price")
-        prev = fi.get("previous_close")
+        # fast_info can miss fields off-hours; fall back to the slower info dict
+        price = fi.get("last_price") or info.get("currentPrice") or info.get("regularMarketPrice")
+        prev = fi.get("previous_close") or info.get("previousClose")
         change = None
         if price is not None and prev not in (None, 0):
             change = (price / prev - 1) * 100
